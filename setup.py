@@ -21,6 +21,7 @@ setup(name="target-athena",
           'pipelinewise-singer-python==1.*',
           'inflection==0.5.1',
           'boto3==1.17.39',
+          'PyAthena==2.2.0',
       ],
       extras_require={
           "test": [
