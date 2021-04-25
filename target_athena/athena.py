@@ -1,0 +1,32 @@
+import os
+import singer
+from pyathena import connect
+
+LOGGER = singer.get_logger('target_athena')
+
+def create_client(config):
+    LOGGER.info("Attempting to create Athena session")
+
+    # Get the required parameters from config file and/or environment variables
+    aws_access_key_id = config.get('aws_access_key_id') or os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = config.get('aws_secret_access_key') or os.environ.get('AWS_SECRET_ACCESS_KEY')
+    aws_session_token = config.get('aws_session_token') or os.environ.get('AWS_SESSION_TOKEN')
+    aws_profile = config.get('aws_profile') or os.environ.get('AWS_PROFILE')
+    s3_staging_dir = config.get('s3_staging_dir') or os.environ.get('S3_STAGING_DIR')
+
+    # AWS credentials based authentication
+    if aws_access_key_id and aws_secret_access_key:
+        cursor = connect(aws_access_key_id=aws_access_key_id,
+                        aws_secret_access_key=aws_secret_access_key,
+                        s3_staging_dir=s3_staging_dir).cursor()
+
+    # AWS Profile based authentication
+    else:
+        cursor = connect(profile_name=aws_profile,
+                        s3_staging_dir=s3_staging_dir).cursor()
+    return cursor
+
+def create_schema(sql, athena_client):
+    athena_client.execute(sql)
+    # print(cursor.description)
+    # print(cursor.fetchall())
