@@ -140,7 +140,7 @@ def persist_messages(messages, config, s3_client, athena_client):
                                                                key_prefix=config.get('s3_key_prefix', ''),
                                                                stream = stream) # TODO: double check this
         ddl = utils.generate_json_table_statement(stream, schema['schema'], 
-                                            database = 'dw', 
+                                            database = config.get('athena_database'), 
                                             data_location=data_location)
         logger.info(ddl)
         logger.info(data_location)

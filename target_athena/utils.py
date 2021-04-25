@@ -18,7 +18,8 @@ def validate_config(config):
     """Validates config"""
     errors = []
     required_config_keys = [
-        's3_bucket'
+        's3_bucket',
+        'athena_database'
     ]
 
     # Check if mandatory keys exist
