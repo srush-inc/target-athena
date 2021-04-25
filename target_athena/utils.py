@@ -205,16 +205,18 @@ def generate_json_table_statement(table, schema, data_location='', database='def
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=serde) if serde else ""
     stored = "\nSTORED AS TEXTFILE"
     location = "\nLOCATION '{}'".format(data_location) if external else ''
+    tblproperties = 'TBLPROPERTIES ("skip.header.line.count" = "1")'
     statement = """CREATE {external_marker}TABLE IF NOT EXISTS {database}.{table} (
 {field_definitions}
 )
-{row_format}{stored}{location};""".format(
+{row_format}{stored}{location}{tblproperties};""".format(
         external_marker=external_marker,
         database=database,
         table=table,
         field_definitions=field_definitions,
         row_format=row_format,
         stored=stored,
-        location=location
+        location=location,
+        tblproperties=tblproperties
     )
     return statement
