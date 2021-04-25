@@ -201,7 +201,7 @@ def generate_field_definitions(schema, level=0):
 def generate_json_table_statement(table, schema, data_location='', database='default', 
                                   external=True, serde='org.apache.hadoop.hive.serde2.OpenCSVSerde'):
     field_definitions = generate_field_definitions(schema['properties'])
-    external_marker = "EXTERNAL " if not external else ""
+    external_marker = "EXTERNAL " if external else ""
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=serde) if serde else ""
     stored = "\nSTORED AS TEXTFILE"
     location = "\nLOCATION '{}'".format(data_location) if external else ''
