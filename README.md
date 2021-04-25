@@ -4,7 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/target-athena.svg)](https://pypi.org/project/target-athena/)
 [![License: Apache2](https://img.shields.io/badge/License-Apache2-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 
-_Note: This target is derived from https://github.com/transferwise/pipelinewise-target-s3-csv_
+_Note: This target is derived from https://github.com/transferwise/pipelinewise-target-s3-csv_.  Some of the documentation below has not been completely updated yet.
 
 [Singer](https://www.singer.io/) target that uploads loads data to AWS Athena in CSV format
 following the [Singer spec](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md).
@@ -53,7 +53,8 @@ Running the the target connector requires a `config.json` file. An example with 
 
    ```json
    {
-     "s3_bucket": "my_bucket"
+     "s3_bucket": "my_bucket",
+     "athena_database": "my_database"
    }
    ```
 

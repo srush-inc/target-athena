@@ -201,9 +201,12 @@ def generate_field_definitions(schema, level=0):
     return field_separator.join(field_definitions)
 
 # This function is borrowed direclty from https://github.com/datadudes/json2hive/blob/master/json2hive/generators.py
-def generate_json_table_statement(table, schema, data_location='', database='default', 
+def generate_json_table_statement(table, schema, headers=None, data_location='', database='default', 
                                   external=True, serde='org.apache.hadoop.hive.serde2.OpenCSVSerde'):
-    field_definitions = generate_field_definitions(schema['properties'])
+    if not headers:
+        field_definitions = generate_field_definitions(schema['properties'])
+    else:
+        field_definitions = ",\n".join(["  `{}` STRING".format(_) for _ in headers])
     external_marker = "EXTERNAL " if external else ""
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=serde) if serde else ""
     stored = "\nSTORED AS TEXTFILE"
