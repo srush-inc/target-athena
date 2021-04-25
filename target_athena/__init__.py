@@ -134,12 +134,13 @@ def persist_messages(messages, config, s3_client, athena_client):
 
     # Create schemas in Athena
     logger.info("headers: {}".format(headers))
-    for stream, schema in schemas.items():
+    for stream, headers in headers.items():
+    # for stream, schema in schemas.items():
         logger.info("schema: {}".format(schema))
         data_location = "s3://{s3_bucket}/{key_prefix}{stream}/".format(s3_bucket=config.get('s3_bucket'), 
                                                                key_prefix=config.get('s3_key_prefix', ''),
                                                                stream = stream) # TODO: double check this
-        ddl = utils.generate_json_table_statement(stream, schema['schema'], 
+        ddl = utils.generate_json_table_statement(stream, schemas[stream]['schema'], 
                                             headers = headers[stream],
                                             database = config.get('athena_database'), 
                                             data_location=data_location)
