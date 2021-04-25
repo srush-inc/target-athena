@@ -149,7 +149,7 @@ def generate_field_definitions(schema, level=0):
     keywords = ['timestamp', 'date', 'datetime']
     tab = "  "
     type_separator = " " if level == 0 else ": "
-    field_separator = "\n" if level == 0 else ",\n"
+    field_separator = ",\n" if level == 0 else ",\n"
     field_definitions = []
     new_level = level + 1
     indentation = new_level * tab
