@@ -154,7 +154,7 @@ def generate_field_definitions(schema, level=0):
     new_level = level + 1
     indentation = new_level * tab
     for name, attributes in schema.items():
-        cleaned_name = "`{}`".format(name) if name.lower() in keywords else name
+        cleaned_name = "`{}`".format(name) #if name.lower() in keywords else name
         if attributes['type'] == 'object':
             field_definitions.append("{indentation}{name}{separator}STRUCT<\n{definitions}\n{indentation}>".format(
                 indentation=indentation,
