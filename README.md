@@ -1,8 +1,10 @@
-# pipelinewise-target-s3-csv
+# target-athena
 
 [![PyPI version](https://badge.fury.io/py/pipelinewise-target-s3-csv.svg)](https://badge.fury.io/py/pipelinewise-target-s3-csv)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pipelinewise-target-s3-csv.svg)](https://pypi.org/project/pipelinewise-target-s3-csv/)
 [![License: Apache2](https://img.shields.io/badge/License-Apache2-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
+
+_Note: This target is derived from https://github.com/transferwise/pipelinewise-target-s3-csv_
 
 [Singer](https://www.singer.io/) target that uploads loads data to S3 in CSV format
 following the [Singer spec](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md).
@@ -25,7 +27,7 @@ It's recommended to use a virtualenv:
 
 ```bash
   python3 -m venv venv
-  pip install pipelinewise-target-s3-csv
+  pip install target-athena
 ```
 
 or
@@ -41,7 +43,7 @@ or
 
 Like any other target that's following the singer specificiation:
 
-`some-singer-tap | target-s3-csv --config [config.json]`
+`some-singer-tap | target-athena --config [config.json]`
 
 It's reading incoming messages from STDIN and using the properites in `config.json` to upload data into Postgres.
 
@@ -89,10 +91,10 @@ Full list of options in `config.json`:
 
 1. Define environment variables that requires running the tests
 ```
-  export TARGET_S3_CSV_ACCESS_KEY_ID=<s3-access-key-id>
-  export TARGET_S3_CSV_SECRET_ACCESS_KEY=<s3-secret-access-key>
-  export TARGET_S3_CSV_BUCKET=<s3-bucket>
-  export TARGET_S3_CSV_KEY_PREFIX=<s3-key-prefix>
+  export TARGET_ATHENA_ACCESS_KEY_ID=<s3-access-key-id>
+  export TARGET_ATHENA_SECRET_ACCESS_KEY=<s3-secret-access-key>
+  export TARGET_ATHENA_BUCKET=<s3-bucket>
+  export TARGET_ATHENA_KEY_PREFIX=<s3-key-prefix>
 ```
 
 2. Install python test dependencies in a virtual env and run nose unit and integration tests
@@ -122,7 +124,7 @@ Full list of options in `config.json`:
   pip install --upgrade pip
   pip install .
   pip install pylint
-  pylint target_s3_csv -d C,W,unexpected-keyword-arg,duplicate-code
+  pylint target_athena -d C,W,unexpected-keyword-arg,duplicate-code
 ```
 
 ## License

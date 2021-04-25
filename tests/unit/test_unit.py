@@ -1,7 +1,7 @@
 import unittest
 from nose.tools import assert_raises
 
-import target_s3_csv
+import target_athena
 
 class TestUnit(unittest.TestCase):
     """
@@ -14,7 +14,7 @@ class TestUnit(unittest.TestCase):
 
     def test_config_validation(self):
         """Test configuration validator"""
-        validator = target_s3_csv.utils.validate_config
+        validator = target_athena.utils.validate_config
         empty_config = {}
         minimal_config = {
             'aws_access_key_id':        "dummy-value",
@@ -38,7 +38,7 @@ class TestUnit(unittest.TestCase):
             'stream': 'the_stream'
         }
         timestamp = 'fake_timestamp'
-        s3_key = target_s3_csv.utils.get_target_key(message, timestamp=timestamp, naming_convention='test_{stream}_{timestamp}_test.csv')
+        s3_key = target_athena.utils.get_target_key(message, timestamp=timestamp, naming_convention='test_{stream}_{timestamp}_test.csv')
 
         self.assertEqual('test_the_stream_fake_timestamp_test.csv', s3_key)
 
@@ -48,7 +48,7 @@ class TestUnit(unittest.TestCase):
         message = {
             'stream': 'the_stream'
         }
-        s3_key = target_s3_csv.utils.get_target_key(message)
+        s3_key = target_athena.utils.get_target_key(message)
 
         # default is "{stream}-{timestamp}.csv"
         self.assertTrue(s3_key.startswith('the_stream'))
@@ -60,6 +60,6 @@ class TestUnit(unittest.TestCase):
         message = {
             'stream': 'the_stream'
         }
-        s3_key = target_s3_csv.utils.get_target_key(message, prefix='the_prefix__', naming_convention='folder1/test_{stream}_test.csv')
+        s3_key = target_athena.utils.get_target_key(message, prefix='the_prefix__', naming_convention='folder1/test_{stream}_test.csv')
 
         self.assertEqual('folder1/the_prefix__test_the_stream_test.csv', s3_key)

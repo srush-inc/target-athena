@@ -11,10 +11,10 @@ def get_config():
     # valid details to an S3 bucket
     # --------------------------------------------------------------------------
     # S3 bucket
-    config['aws_access_key_id'] = os.environ.get('TARGET_S3_CSV_ACCESS_KEY_ID')
-    config['aws_secret_access_key'] = os.environ.get('TARGET_S3_CSV_SECRET_ACCESS_KEY')
-    config['s3_bucket'] = os.environ.get('TARGET_S3_CSV_BUCKET')
-    config['s3_key_prefix'] = os.environ.get('TARGET_S3_CSV_KEY_PREFIX')
+    config['aws_access_key_id'] = os.environ.get('TARGET_ATHENA_ACCESS_KEY_ID')
+    config['aws_secret_access_key'] = os.environ.get('TARGET_ATHENA_SECRET_ACCESS_KEY')
+    config['s3_bucket'] = os.environ.get('TARGET_ATHENA_BUCKET')
+    config['s3_key_prefix'] = os.environ.get('TARGET_ATHENA_KEY_PREFIX')
 
     # --------------------------------------------------------------------------
     # The following variables needs to be empty.
