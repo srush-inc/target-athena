@@ -14,6 +14,7 @@ from datetime import datetime
 import singer
 from jsonschema import Draft7Validator, FormatChecker
 
+from target_athena import athena
 from target_athena import s3
 from target_athena import utils
 
@@ -29,7 +30,7 @@ def emit_state(state):
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-def persist_messages(messages, config, s3_client):
+def persist_messages(messages, config, s3_client, athena_client):
     state = None
     schemas = {}
     key_properties = {}
@@ -131,6 +132,14 @@ def persist_messages(messages, config, s3_client):
             logger.warning("Unknown message type {} in message {}"
                             .format(o['type'], o))
 
+    # Create schemas in Athena
+    for stream, schema in schemas.items():
+        data_location = "s3://{s3_bucket}/{target_key}".format(s3_bucket, target_key) # TODO: double check this
+        ddl = generate_json_table_statement(stream, schema, 
+                                            database = 'dw', 
+                                            data_location=target_key)
+        athena.create_schema(ddl, athena_client)
+
     # Upload created CSV files to S3
     for filename, target_key in filenames:
         compressed_file = None
@@ -181,9 +190,10 @@ def main():
         sys.exit(1)
 
     s3_client = s3.create_client(config)
+    athena_client = athena.create_client(config)
 
     input_messages = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
-    state = persist_messages(input_messages, config, s3_client)
+    state = persist_messages(input_messages, config, s3_client, athena_client)
 
     emit_state(state)
     logger.debug("Exiting normally")
