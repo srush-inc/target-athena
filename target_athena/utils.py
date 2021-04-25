@@ -186,14 +186,16 @@ def generate_field_definitions(schema, level=0):
                 indentation=indentation,
                 name=cleaned_name,
                 separator=type_separator,
-                type=types[0].upper()
+                type='STRING'
+                # type=types[0].upper()
             ))           
         else:
             field_definitions.append("{indentation}{name}{separator}{type}".format(
                 indentation=indentation,
                 name=cleaned_name,
                 separator=type_separator,
-                type=attributes['type'].upper()
+                # type=attributes['type'].upper()
+                type='STRING'                
             ))
     return field_separator.join(field_definitions)
 
@@ -205,7 +207,7 @@ def generate_json_table_statement(table, schema, data_location='', database='def
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=serde) if serde else ""
     stored = "\nSTORED AS TEXTFILE"
     location = "\nLOCATION '{}'".format(data_location) if external else ''
-    tblproperties = 'TBLPROPERTIES ("skip.header.line.count" = "1")'
+    tblproperties = '\nTBLPROPERTIES ("skip.header.line.count" = "1")'
     statement = """CREATE {external_marker}TABLE IF NOT EXISTS {database}.{table} (
 {field_definitions}
 )
