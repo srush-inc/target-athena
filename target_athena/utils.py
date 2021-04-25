@@ -180,6 +180,14 @@ def generate_field_definitions(schema, level=0):
                 definitions=array_type,
                 closing_bracket=closing_bracket
             ))
+        elif isinstance(attributes['type'], list):
+            types = [_ for _ in attributes['type'] if _ != 'null']
+            field_definitions.append("{indentation}{name}{separator}{type}".format(
+                indentation=indentation,
+                name=cleaned_name,
+                separator=type_separator,
+                type=types[0].upper()
+            ))           
         else:
             field_definitions.append("{indentation}{name}{separator}{type}".format(
                 indentation=indentation,
