@@ -136,7 +136,9 @@ def persist_messages(messages, config, s3_client, athena_client):
     # logger.info("schemas: {}".format(schemas))
     for stream, schema in schemas.items():
         logger.info("schema: {}".format(schema))
-        data_location = "s3://{s3_bucket}/{target_key}".format(s3_bucket=config.get('s3_bucket'), target_key=target_key) # TODO: double check this
+        data_location = "s3://{s3_bucket}/{key_prefix}{stream}/".format(s3_bucket=config.get('s3_bucket'), 
+                                                               key_prefix=config.get('s3_key_prefix', ''),
+                                                               stream = stream) # TODO: double check this
         ddl = utils.generate_json_table_statement(stream, schema['schema'], 
                                             database = 'dw', 
                                             data_location=data_location)
