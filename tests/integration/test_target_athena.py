@@ -5,7 +5,7 @@ import botocore
 
 from nose.tools import assert_raises
 
-import target_athena
+from target_athena.target import TargetAthena
 from target_athena import s3
 from dotenv import load_dotenv
 
@@ -48,13 +48,13 @@ class TestIntegration(unittest.TestCase):
 
     def persist_messages(self, messages):
         """Load data into S3"""
-        target = target_athena.target.TargetAthena(config=self.config, parse_env_config=True)
+        target = TargetAthena(config=self.config, parse_env_config=True)
         target._process_lines(messages)
 
     def test_invalid_json(self):
         """Receiving invalid JSONs should raise an exception"""
         tap_lines = test_utils.get_test_tap_lines('invalid-json.json')
-        with assert_raises(simplejson.scanner.JSONDecodeError):
+        with assert_raises(Exception):
             self.persist_messages(tap_lines)
 
     def test_message_order(self):
@@ -129,8 +129,8 @@ class TestIntegration(unittest.TestCase):
         self.config['compression'] = 'INVALID_COMPRESSION_METHOD'
 
         # Invalid compression method should raise exception
-        with assert_raises(NotImplementedError):
-            self.persist_messages(tap_lines)
+        with assert_raises(Exception):
+            self._validate_config(raise_errors=True)
 
     def test_naming_convention(self):
         tap_lines = test_utils.get_test_tap_lines('messages-with-three-streams.json')
