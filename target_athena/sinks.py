@@ -31,15 +31,6 @@ class AthenaSink(Sink):
         self._s3_client = None
         self._athena_client = None
 
-    def load_record(self, record: dict) -> None:
-        """Load a record."""
-        # TODO: Load
-        # Sample:
-        # for record in records_to_drain:
-        #     write(record)
-        #     count += 1
-        # self.tally_record_written(count)
-
     @property
     def s3_client(self):
         if not self._s3_client:
@@ -49,7 +40,7 @@ class AthenaSink(Sink):
     @property
     def athena_client(self):
         if not self._athena_client:
-            self._athena_client = athena.create_client(self.config)
+            self._athena_client = athena.create_client(self.config, self.logger)
         return self._athena_client
 
     def drain(self, records_to_drain: List[dict]) -> None:

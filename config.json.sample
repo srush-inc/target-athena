@@ -3,5 +3,5 @@
 	"aws_secret_access_key": "SECRET",
 	"s3_bucket": "BUCKET",
 	"s3_key_prefix": "SOME-PREFIX/",
-	"s3_staging_dir": "STAGING_DIR"
+	"s3_staging_dir": "s3://YOUR_S3_BUCKET/path/to/"
 }
