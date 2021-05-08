@@ -7,12 +7,15 @@ from nose.tools import assert_raises
 
 import target_athena
 from target_athena import s3
-
+from dotenv import load_dotenv
 
 try:
     import tests.utils as test_utils
 except ImportError:
     import utils as test_utils
+
+
+load_dotenv()  # take environment variables from .env.
 
 
 class TestIntegration(unittest.TestCase):
@@ -24,6 +27,7 @@ class TestIntegration(unittest.TestCase):
     def setUp(self):
         self.config = test_utils.get_test_config()
         self.s3_client = s3.create_client(self.config)
+
 
     def assert_three_streams_are_in_s3_bucket(self,
                                               should_metadata_columns_exist=False,
@@ -42,11 +46,10 @@ class TestIntegration(unittest.TestCase):
         #       parameters
         self.assertTrue(True)
 
-    def persist_messages(self, messages, s3_client=None):
+    def persist_messages(self, messages):
         """Load data into S3"""
-        if s3_client is None:
-            s3_client = self.s3_client
-        target_athena.persist_messages(messages, self.config, s3_client)
+        target = target_athena.target.TargetAthena(config=self.config, parse_env_config=True)
+        target._process_lines(messages)
 
     def test_invalid_json(self):
         """Receiving invalid JSONs should raise an exception"""
@@ -81,8 +84,7 @@ class TestIntegration(unittest.TestCase):
             config_aws_env_vars['aws_secret_access_key'] = None
 
             # Create a new S3 client using env vars
-            s3_client_aws_env_vars = s3.create_client(config_aws_env_vars)
-            self.persist_messages(tap_lines, s3_client_aws_env_vars)
+            self.persist_messages(tap_lines)
             self.assert_three_streams_are_in_s3_bucket()
         # Delete temporary env var to not confuse other tests
         finally:

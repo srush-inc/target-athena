@@ -74,7 +74,10 @@ def get_target_key(stream_name, prefix=None, timestamp=None, naming_convention=N
         "{date}": datetime.now().strftime("%Y-%m-%d"),
     }.items():
         if k in key:
-            key = key.replace(k, v)
+            try:
+                key = key.replace(k, v)
+            except Exception as ex:
+                raise Exception(f"{ex}. Key was {key}, k was {k}. Value was {v}")
 
     # replace dynamic tokens
     # todo: replace dynamic tokens such as {date(<format>)} with the date formatted as requested in <format>

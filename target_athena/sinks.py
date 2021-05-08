@@ -20,7 +20,14 @@ class AthenaSink(Sink):
 
     DEFAULT_BATCH_SIZE_ROWS = 10000
 
-    def __init__(self):
+    def __init__(
+        self,
+        target,
+        stream_name,
+        schema,
+        key_properties,
+    ):
+        super().__init__(target=target, stream_name=stream_name, schema=schema, key_properties=key_properties)
         self._s3_client = None
         self._athena_client = None
 
