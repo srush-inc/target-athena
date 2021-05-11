@@ -1,3 +1,6 @@
+# Protected env vars
+.env
+
 # IDE
 .vscode
 .idea/*

@@ -19,6 +19,7 @@ setup(name="target-athena",
       py_modules=["target_athena"],
       install_requires=[
           'pipelinewise-singer-python==1.*',
+          'singer-sdk==^0.1.0',
           'inflection==0.5.1',
           'boto3==1.17.39',
           'PyAthena==2.2.0',
