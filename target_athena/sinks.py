@@ -93,6 +93,12 @@ class AthenaSink(Sink):
             else:
                 headers[self.stream_name] = flattened_record.keys()
 
+            # Athena does not support newline characters in CSV format.
+            # Remove `\n` and replace with escaped text `\\n` ('\n')
+            for k, v in flattened_record.items():
+                if isinstance(v, str) and "\n" in v:
+                    flattened_record[k] = v.replace("\n", "\\n")
+
             with open(filename, "a") as csvfile:
                 writer = csv.DictWriter(
                     csvfile,
