@@ -41,7 +41,7 @@ def create_client(config, logger: Logger):
     return cursor
 
 
-def create_schema(sql, athena_client):
+def execute_sql(sql, athena_client):
     athena_client.execute(sql)
     # print(cursor.description)
     # print(cursor.fetchall())

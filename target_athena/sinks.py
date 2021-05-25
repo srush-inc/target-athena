@@ -31,6 +31,9 @@ class AthenaSink(Sink):
         self._s3_client = None
         self._athena_client = None
 
+        ddl = utils.generate_create_database_ddl(self.config["athena_database"])
+        athena.execute_sql(ddl, self.athena_client)
+
     @property
     def s3_client(self):
         if not self._s3_client:
@@ -131,7 +134,7 @@ class AthenaSink(Sink):
             )
             self.logger.info(ddl)
             self.logger.info(data_location)
-            athena.create_schema(ddl, self.athena_client)
+            athena.execute_sql(ddl, self.athena_client)
 
         # Upload created CSV files to S3
         for filename, target_key in filenames:

@@ -156,6 +156,11 @@ def generate_field_definitions(schema, level=0):
     return field_separator.join(field_definitions)
 
 
+def generate_create_database_ddl(
+    database: str="default"
+)-> None:
+    return f"CREATE DATABASE IF NOT EXISTS {database};"
+
 # This function is borrowed direclty from https://github.com/datadudes/json2hive/blob/master/json2hive/generators.py
 def generate_json_table_statement(
     table,
