@@ -31,7 +31,7 @@ class AthenaSink(Sink):
         self._s3_client = None
         self._athena_client = None
 
-        ddl = utils.generate_create_database_ddl(self.config["athena_database"])
+        ddl = athena.generate_create_database_ddl(self.config["athena_database"])
         athena.execute_sql(ddl, self.athena_client)
 
     @property
@@ -111,7 +111,7 @@ class AthenaSink(Sink):
                 key_prefix=self.config.get("s3_key_prefix", ""),
                 stream=stream,
             )  # TODO: double check this
-            ddl = utils.generate_json_table_statement(
+            ddl = athena.generate_json_table_statement(
                 stream,
                 self.schema,
                 headers=headers,
