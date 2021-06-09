@@ -13,7 +13,7 @@ from singer_sdk.sinks import Sink
 from target_athena import athena
 from target_athena import s3
 from target_athena import utils
-
+from target_athena import formats
 
 class AthenaSink(Sink):
     """Athena target sink class."""
@@ -51,6 +51,7 @@ class AthenaSink(Sink):
         state = None
         headers = {}
 
+        object_format = self.config.get("object_format")
         delimiter = self.config.get("delimiter", ",")
         quotechar = self.config.get("quotechar", '"')
 
@@ -84,36 +85,21 @@ class AthenaSink(Sink):
 
             flattened_record = utils.flatten_record(record)
 
-            if self.stream_name not in headers and not file_is_empty:
-                with open(filename, "r") as csvfile:
-                    reader = csv.reader(
-                        csvfile, delimiter=delimiter, quotechar=quotechar
-                    )
-                    first_line = next(reader)
-                    headers[self.stream_name] = (
-                        first_line if first_line else flattened_record.keys()
-                    )
-            else:
-                headers[self.stream_name] = flattened_record.keys()
-
-            # Athena does not support newline characters in CSV format.
-            # Remove `\n` and replace with escaped text `\\n` ('\n')
-            for k, v in flattened_record.items():
-                if isinstance(v, str) and "\n" in v:
-                    flattened_record[k] = v.replace("\n", "\\n")
-
-            with open(filename, "a") as csvfile:
-                writer = csv.DictWriter(
-                    csvfile,
-                    headers[self.stream_name],
-                    extrasaction="ignore",
-                    delimiter=delimiter,
-                    quotechar=quotechar,
+            if object_format == 'csv':
+                formats.write_csv(
+                    filename=filename,
+                    record = flattened_record,
+                    header = headers.get(self.stream_name),
+                    delimiter = delimiter,
+                    quotechar = quotechar
                 )
-                if file_is_empty:
-                    writer.writeheader()
-
-                writer.writerow(flattened_record)
+            elif object_format == 'jsonl':
+                formats.write_jsonl(
+                    filename = filename,
+                    record = flattened_record
+                )
+            else:
+                self.logger.warn(f"Unrecognized format: '{object_format}'")
 
         # Create schemas in Athena
         self.logger.info("headers: {}".format(headers))
@@ -136,7 +122,7 @@ class AthenaSink(Sink):
             self.logger.info(data_location)
             athena.execute_sql(ddl, self.athena_client)
 
-        # Upload created CSV files to S3
+        # Upload created files to S3
         for filename, target_key in filenames:
             compressed_file = None
             if (
