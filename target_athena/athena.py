@@ -42,8 +42,13 @@ def create_client(config, logger: Logger):
 
 def execute_sql(sql, athena_client):
     athena_client.execute(sql)
-    # print(cursor.description)
-    # print(cursor.fetchall())
+
+def table_exists(athena_client, database, table_name):
+    athena_client.execute("SHOW TABLES IN {database} '{table_name}';")
+    if not athena_client.fetchall():
+        return False
+    else:
+        return True
 
 # This function is borrowed direclty from https://github.com/datadudes/json2hive/blob/master/json2hive/generators.py
 def generate_field_definitions(schema, level=0):
@@ -118,24 +123,25 @@ def generate_create_database_ddl(
     return f"CREATE DATABASE IF NOT EXISTS {database};"
 
 # This function is borrowed direclty from https://github.com/datadudes/json2hive/blob/master/json2hive/generators.py
-def generate_json_table_statement(
+def generate_create_table_ddl(
     table,
     schema,
     headers=None,
     data_location="",
     database="default",
     external=True,
-    serde="org.apache.hadoop.hive.serde2.OpenCSVSerde",
+    row_format="org.apache.hadoop.hive.serde2.OpenCSVSerde",
+    skip_header = True,
 ):
     if not headers:
         field_definitions = generate_field_definitions(schema["properties"])
     else:
         field_definitions = ",\n".join(["  `{}` STRING".format(_) for _ in headers])
     external_marker = "EXTERNAL " if external else ""
-    row_format = "ROW FORMAT SERDE '{serde}'".format(serde=serde) if serde else ""
+    row_format = "ROW FORMAT SERDE '{serde}'".format(serde=row_format) if row_format else ""
     stored = "\nSTORED AS TEXTFILE"
     location = "\nLOCATION '{}'".format(data_location) if external else ""
-    tblproperties = '\nTBLPROPERTIES ("skip.header.line.count" = "1")'
+    tblproperties = '\nTBLPROPERTIES ("skip.header.line.count" = "1")' if skip_header else ""
     statement = """CREATE {external_marker}TABLE IF NOT EXISTS {database}.{table} (
 {field_definitions}
 )

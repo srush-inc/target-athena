@@ -50,6 +50,7 @@ class AthenaSink(Sink):
         """Write any prepped records out and return only once fully written."""
         state = None
         headers = {}
+        headers = self.schema.keys()
 
         object_format = self.config.get("object_format")
         delimiter = self.config.get("delimiter", ",")
@@ -67,8 +68,9 @@ class AthenaSink(Sink):
         filenames = []
         now = datetime.now().strftime("%Y%m%dT%H%M%S")
 
+        # Serialize records to local files
         for record in records_to_drain:
-            filename = self.stream_name + "-" + now + ".csv"
+            filename = self.stream_name + "-" + now + "." + object_format
             filename = os.path.expanduser(os.path.join(temp_dir, filename))
             target_key = utils.get_target_key(
                 self.stream_name,
@@ -87,9 +89,9 @@ class AthenaSink(Sink):
 
             if object_format == 'csv':
                 formats.write_csv(
-                    filename=filename,
+                    filename = filename,
                     record = flattened_record,
-                    header = headers.get(self.stream_name),
+                    header = headers,
                     delimiter = delimiter,
                     quotechar = quotechar
                 )
@@ -103,24 +105,35 @@ class AthenaSink(Sink):
 
         # Create schemas in Athena
         self.logger.info("headers: {}".format(headers))
-        for stream, headers in headers.items():
-            # for stream, schema in schemas.items():
-            self.logger.info("schema: {}".format(self.schema))
-            data_location = "s3://{s3_bucket}/{key_prefix}{stream}/".format(
-                s3_bucket=self.config.get("s3_bucket"),
-                key_prefix=self.config.get("s3_key_prefix", ""),
-                stream=stream,
-            )  # TODO: double check this
-            ddl = athena.generate_json_table_statement(
-                stream,
+        data_location = "s3://{s3_bucket}/{key_prefix}{stream}/".format(
+            s3_bucket=self.config.get("s3_bucket"),
+            key_prefix=self.config.get("s3_key_prefix", ""),
+            stream=self.stream_name,
+        )  # TODO: double check this
+        if object_format == 'csv':
+            ddl = athena.generate_create_table_ddl(
+                self.stream_name,
                 self.schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
                 data_location=data_location,
+                row_format="org.apache.hadoop.hive.serde2.OpenCSVSerde",
             )
-            self.logger.info(ddl)
-            self.logger.info(data_location)
-            athena.execute_sql(ddl, self.athena_client)
+        elif object_format == 'jsonl':
+            ddl = athena.generate_create_table_ddl(
+                self.stream_name,
+                self.schema,
+                headers=headers,
+                database=self.config.get("athena_database"),
+                data_location=data_location,
+                skip_header=False,
+                row_format="org.openx.data.jsonserde.JsonSerDe",
+            )
+        else:
+            self.logger.warn(f"Unrecognized format: '{object_format}'")
+        self.logger.info(ddl)
+        self.logger.info(data_location)
+        athena.execute_sql(ddl, self.athena_client)
 
         # Upload created files to S3
         for filename, target_key in filenames:
