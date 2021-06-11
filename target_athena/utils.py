@@ -55,32 +55,16 @@ def flatten_record(d, parent_key=[], sep="__"):
     return dict(items)
 
 
-def get_target_key(stream_name, prefix=None, timestamp=None, naming_convention=None):
+def get_target_key(stream_name, object_format, prefix="", timestamp=None, naming_convention=None):
     """Creates and returns an S3 key for the message"""
-    if not naming_convention:
-        naming_convention = (
-            "{stream}/{timestamp}.csv"  # o['stream'] + '-' + now + '.csv'
-        )
+
     if not timestamp:
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-    key = naming_convention
 
-    # replace simple tokens
-    for k, v in {
-        "{stream}": stream_name,
-        "{timestamp}": timestamp,
-        "{date}": datetime.now().strftime("%Y-%m-%d"),
-    }.items():
-        if k in key:
-            try:
-                key = key.replace(k, v)
-            except Exception as ex:
-                raise Exception(f"{ex}. Key was {key}, k was {k}. Value was {v}")
+    key = "{prefix}{stream_name}/{timestamp}.{object_format}".format(
+        prefix=prefix, 
+        stream_name=stream_name, 
+        timestamp=timestamp, 
+        object_format=object_format)
 
-    # replace dynamic tokens
-    # todo: replace dynamic tokens such as {date(<format>)} with the date formatted as requested in <format>
-
-    if prefix:
-        filename = key.split("/")[-1]
-        key = key.replace(filename, f"{prefix}{filename}")
-    return key
+    return key 

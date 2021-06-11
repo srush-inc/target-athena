@@ -76,7 +76,7 @@ class AthenaSink(Sink):
                 self.stream_name,
                 prefix=self.config.get("s3_key_prefix", ""),
                 timestamp=now,
-                naming_convention=self.config.get("naming_convention"),
+                # naming_convention=self.config.get("naming_convention"),
             )
             if not (filename, target_key) in filenames:
                 filenames.append((filename, target_key))
