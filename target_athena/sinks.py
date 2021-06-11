@@ -74,6 +74,7 @@ class AthenaSink(Sink):
             filename = os.path.expanduser(os.path.join(temp_dir, filename))
             target_key = utils.get_target_key(
                 self.stream_name,
+                object_format,
                 prefix=self.config.get("s3_key_prefix", ""),
                 timestamp=now,
                 # naming_convention=self.config.get("naming_convention"),
