@@ -147,6 +147,7 @@ class AthenaSink(Sink):
             else:
                 if self.config["compression"] == "gzip":
                     compressed_file = f"{filename}.gz"
+                    target_key = target_key + ".gz"
                     with open(filename, "rb") as f_in:
                         with gzip.open(compressed_file, "wb") as f_out:
                             self.logger.info(f"Compressing file as '{compressed_file}'")
