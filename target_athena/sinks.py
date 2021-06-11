@@ -50,7 +50,7 @@ class AthenaSink(Sink):
         """Write any prepped records out and return only once fully written."""
         state = None
         headers = {}
-        headers = self.schema.keys()
+        headers = self.schema["properties"].keys()
 
         object_format = self.config.get("object_format")
         delimiter = self.config.get("delimiter", ",")
