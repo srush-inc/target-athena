@@ -27,6 +27,7 @@ class TargetAthena(Target):
         th.Property("encryption_type", th.StringType),
         th.Property("encryption_key", th.StringType),
         th.Property("add_metadata_columns", th.BooleanType, default=False),
+        th.Property("flatten_records", th.BooleanType, default=False),
         th.Property("delimiter", th.StringType, default=","),
         th.Property("quotechar", th.StringType, default='"'),
         th.Property("temp_dir", th.StringType),

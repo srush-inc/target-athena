@@ -86,7 +86,10 @@ class AthenaSink(Sink):
                 filename
             ).st_size == 0
 
-            flattened_record = utils.flatten_record(record)
+            if self.config.get("flatten_records"):
+                flattened_record = utils.flatten_record(record)
+            else:
+                flattened_record = record
 
             if object_format == 'csv':
                 formats.write_csv(
