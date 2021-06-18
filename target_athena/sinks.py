@@ -72,7 +72,7 @@ class AthenaSink(Sink):
         for record in records_to_drain:
             filename = self.stream_name + "-" + now + "." + object_format
             filename = os.path.expanduser(os.path.join(temp_dir, filename))
-            s3_prefix = "{prefix}{database}".format(
+            s3_prefix = "{prefix}{database}/".format(
                 prefix=self.config.get("s3_key_prefix", ""),
                 database=self.config.get("athena_database", "")
             )
