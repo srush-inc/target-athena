@@ -72,10 +72,14 @@ class AthenaSink(Sink):
         for record in records_to_drain:
             filename = self.stream_name + "-" + now + "." + object_format
             filename = os.path.expanduser(os.path.join(temp_dir, filename))
+            s3_prefix = "{prefix}{database}".format(
+                prefix=self.config.get("s3_key_prefix", ""),
+                database=self.config.get("athena_database", "")
+            )
             target_key = utils.get_target_key(
                 self.stream_name,
                 object_format,
-                prefix=self.config.get("s3_key_prefix", ""),
+                prefix=s3_prefix,
                 timestamp=now,
                 # naming_convention=self.config.get("naming_convention"),
             )
@@ -109,9 +113,10 @@ class AthenaSink(Sink):
 
         # Create schemas in Athena
         self.logger.info("headers: {}".format(headers))
-        data_location = "s3://{s3_bucket}/{key_prefix}{stream}/".format(
+        data_location = "s3://{s3_bucket}/{key_prefix}{database}/{stream}/".format(
             s3_bucket=self.config.get("s3_bucket"),
             key_prefix=self.config.get("s3_key_prefix", ""),
+            database=self.config.get("athena_database",""),
             stream=self.stream_name,
         )  # TODO: double check this
         if object_format == 'csv':
