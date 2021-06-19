@@ -61,10 +61,6 @@ def get_target_key(stream_name, object_format, prefix="", timestamp=None, naming
     if not timestamp:
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
 
-    key = "{prefix}{stream_name}/{timestamp}.{object_format}".format(
-        prefix=prefix, 
-        stream_name=stream_name, 
-        timestamp=timestamp, 
-        object_format=object_format)
+    key = f"{prefix}{stream_name}/{timestamp}.{object_format}"
 
     return key 
