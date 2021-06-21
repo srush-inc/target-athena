@@ -5,6 +5,16 @@ from pyathena import connect
 
 
 def create_client(config, logger: Logger):
+    """Generates an athena client object
+
+    Args:
+        config ([type]): [description]
+        logger (Logger): [description]
+
+    Returns:
+        cursor: athena client object
+    """
+
     logger.info("Attempting to create Athena session")
 
     # Get the required parameters from config file and/or environment variables
@@ -41,9 +51,25 @@ def create_client(config, logger: Logger):
     return cursor
 
 def execute_sql(sql, athena_client):
+    """Run sql expression using athena client
+
+    Args:
+        sql (string): a valid sql statement string
+        athena_client ([type]): [description]
+    """
     athena_client.execute(sql)
 
 def table_exists(athena_client, database, table_name):
+    """Determine if a table already exists in athena.
+
+    Args:
+        athena_client ([type]): [description]
+        database ([type]): [description]
+        table_name ([type]): [description]
+
+    Returns:
+        bool: true/false
+    """
     athena_client.execute("SHOW TABLES IN {database} '{table_name}';")
     if not athena_client.fetchall():
         return False
@@ -51,7 +77,18 @@ def table_exists(athena_client, database, table_name):
         return True
 
 # This function is borrowed direclty from https://github.com/datadudes/json2hive/blob/master/json2hive/generators.py
-def generate_field_definitions(schema, level=0):
+def generate_column_definitions(schema, level=0):
+    """Generates stringified column definitions for interpolation in the Hive table creation
+    by recursively traversing a nested schema dictionary and inferring type according to 
+    supported Hive types.
+
+    Args:
+        schema (dict): Schema dictionary
+        level (int, optional): [description]. Defaults to 0.
+
+    Returns:
+        string: a stringified listi of column/type pairs.
+    """
     keywords = ["timestamp", "date", "datetime"]
     tab = "  "
     type_separator = " " if level == 0 else ": "
@@ -67,7 +104,7 @@ def generate_field_definitions(schema, level=0):
                     indentation=indentation,
                     name=cleaned_name,
                     separator=type_separator,
-                    definitions=generate_field_definitions(
+                    definitions=generate_column_definitions(
                         attributes["properties"], new_level
                     ),
                 )
@@ -78,7 +115,7 @@ def generate_field_definitions(schema, level=0):
                 closing_bracket = "\n" + indentation + ">"
                 array_type = "STRUCT<\n{definitions}\n{indentation}>".format(
                     indentation=extra_indentation,
-                    definitions=generate_field_definitions(
+                    definitions=generate_column_definitions(
                         attributes["items"]["properties"], new_level + 1
                     ),
                 )
@@ -133,8 +170,21 @@ def generate_create_table_ddl(
     row_format="org.apache.hadoop.hive.serde2.OpenCSVSerde",
     skip_header = True,
 ):
+    """Generate DDL for Hive table creation.
+
+    Args:
+        table ([type]): [description]
+        schema ([type]): [description]
+        headers ([type], optional): [description]. Defaults to None.
+        data_location (str, optional): [description]. Defaults to "".
+        database (str, optional): [description]. Defaults to "default".
+        external (bool, optional): [description]. Defaults to True.
+        row_format (str, optional): [description]. Defaults to "org.apache.hadoop.hive.serde2.OpenCSVSerde".
+        skip_header (bool, optional): [description]. Defaults to True.
+    """
+
     if not headers:
-        field_definitions = generate_field_definitions(schema["properties"])
+        field_definitions = generate_column_definitions(schema["properties"])
     else:
         field_definitions = ",\n".join(["  `{}` STRING".format(_) for _ in headers])
     external_marker = "EXTERNAL " if external else ""
@@ -156,3 +206,50 @@ def generate_create_table_ddl(
         tblproperties=tblproperties,
     )
     return statement
+
+def create_or_replace_table(
+    client,
+    table,
+    schema,
+    headers=None,
+    data_location="",
+    database="default",
+    external=True,
+    row_format="org.apache.hadoop.hive.serde2.OpenCSVSerde",
+    skip_header = True,
+):
+    if table_exists(athena_client=client, database=database, table_name=table):
+        # alter table prefix
+        alter_table = "ALTER TABLE {database}.{table} ".format(database, table)
+
+        # update row_format
+        # NOTE: this does not seem to be supported in Athena
+        # execute_sql(ddl, client)
+
+        # update columns
+        if not headers:
+            field_definitions = generate_column_definitions(schema["properties"])
+        else:
+            field_definitions = ", ".join(["`{}` STRING".format(_) for _ in headers])        
+        ddl = alter_table + "REPLACE COLUMNS (field_definitions}".format(field_definitions)
+        execute_sql(ddl, client)
+
+        # update location
+        ddl = alter_table + "SET LOCATION '{data_location}'".format(data_location)
+        execute_sql(ddl, client)
+
+        # skip_header
+        ddl = alter_table + "SET TBLPROPERTIES ('skip.header.line.count'='{skip}');".format(skip=int(skip_header))
+        execute_sql(ddl, client)        
+    
+    else:
+        ddl = generate_create_table_ddl(
+            table=table,
+            schema=schema,
+            headers=headers,
+            database=database,
+            data_location=data_location,
+            skip_header=skip_header,
+            row_format=row_format,
+        )
+        execute_sql(ddl, client)
