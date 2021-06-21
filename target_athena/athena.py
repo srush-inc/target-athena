@@ -192,7 +192,7 @@ def generate_create_table_ddl(
     external_marker = "EXTERNAL " if external else ""
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=row_format) if row_format else ""
     stored = "\nSTORED AS TEXTFILE"
-    serdeproperties = "\nWITH SERDEPROPERTIES ({serdeproperties})".format(serdeproperties) if serdeproperties else ""
+    serdeproperties = "\nWITH SERDEPROPERTIES ({})".format(serdeproperties) if serdeproperties else ""
     location = "\nLOCATION '{}'".format(data_location) if external else ""
     tblproperties = '\nTBLPROPERTIES ("skip.header.line.count" = "1")' if skip_header else ""
     statement = """CREATE {external_marker}TABLE IF NOT EXISTS {database}.{table} (
