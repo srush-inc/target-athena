@@ -137,6 +137,7 @@ class AthenaSink(Sink):
                 data_location=data_location,
                 skip_header=False,
                 row_format="org.openx.data.jsonserde.JsonSerDe",
+                serdeproperties="'ignore.malformed.json'='true', 'case.insensitive'='false'"
             )
         else:
             self.logger.warn(f"Unrecognized format: '{object_format}'")

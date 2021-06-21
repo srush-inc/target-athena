@@ -168,6 +168,7 @@ def generate_create_table_ddl(
     database="default",
     external=True,
     row_format="org.apache.hadoop.hive.serde2.OpenCSVSerde",
+    serdeproperties = None,
     skip_header = True,
 ):
     """Generate DDL for Hive table creation.
@@ -180,6 +181,7 @@ def generate_create_table_ddl(
         database (str, optional): [description]. Defaults to "default".
         external (bool, optional): [description]. Defaults to True.
         row_format (str, optional): [description]. Defaults to "org.apache.hadoop.hive.serde2.OpenCSVSerde".
+        serdeproperties (str, optional): [description]
         skip_header (bool, optional): [description]. Defaults to True.
     """
 
@@ -190,17 +192,19 @@ def generate_create_table_ddl(
     external_marker = "EXTERNAL " if external else ""
     row_format = "ROW FORMAT SERDE '{serde}'".format(serde=row_format) if row_format else ""
     stored = "\nSTORED AS TEXTFILE"
+    serdeproperties = "\nWITH SERDEPROPERTIES ({serdeproperties})".format(serdeproperties) if serdeproperties else ""
     location = "\nLOCATION '{}'".format(data_location) if external else ""
     tblproperties = '\nTBLPROPERTIES ("skip.header.line.count" = "1")' if skip_header else ""
     statement = """CREATE {external_marker}TABLE IF NOT EXISTS {database}.{table} (
 {field_definitions}
 )
-{row_format}{stored}{location}{tblproperties};""".format(
+{row_format}{serdeproperties}{stored}{location}{tblproperties};""".format(
         external_marker=external_marker,
         database=database,
         table=table,
         field_definitions=field_definitions,
         row_format=row_format,
+        serdeproperties=serdeproperties,
         stored=stored,
         location=location,
         tblproperties=tblproperties,
