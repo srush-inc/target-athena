@@ -8,14 +8,14 @@ import shutil
 from typing import List
 import tempfile
 
-from singer_sdk.sinks import Sink
+from singer_sdk.sinks import BatchSink
 
 from target_athena import athena
 from target_athena import s3
 from target_athena import utils
 
 
-class AthenaSink(Sink):
+class AthenaSink(BatchSink):
     """Athena target sink class."""
 
     DEFAULT_BATCH_SIZE_ROWS = 10000
@@ -46,8 +46,11 @@ class AthenaSink(Sink):
             self._athena_client = athena.create_client(self.config, self.logger)
         return self._athena_client
 
-    def drain(self, records_to_drain: List[dict]) -> None:
+    def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
+        # The SDK populates `context["records"]` automatically
+        # since we do not override `process_record()`.
+        records_to_drain = context["records"]
         state = None
         headers = {}
 
