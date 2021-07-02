@@ -1,7 +1,6 @@
 import os
-import unittest
-import simplejson
 import botocore
+import unittest
 
 from nose.tools import assert_raises
 
