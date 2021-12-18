@@ -6,13 +6,12 @@ authors = ["FirstName LastName"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
-python = ">=3.6.1,<3.10"
+python = ">=3.6.2,<3.10"
 requests = "^2.25.1"
 boto3 = "^1.17.64"
 pyathena = "^2.2.0"
-
-singer-sdk = "0.3.9"
 # singer-sdk = {path = "../sdk", develop = true}
+singer-sdk = "^0.3.16"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
