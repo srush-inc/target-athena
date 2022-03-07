@@ -46,6 +46,10 @@ class AthenaSink(BatchSink):
             self._athena_client = athena.create_client(self.config, self.logger)
         return self._athena_client
 
+    @staticmethod
+    def _clean_table_name(stream_name):
+        return stream_name.replace("-", "_")
+
     def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
         # The SDK populates `context["records"]` automatically
@@ -124,7 +128,7 @@ class AthenaSink(BatchSink):
         )  # TODO: double check this
         if object_format == 'csv':
             ddl = athena.generate_create_table_ddl(
-                self.stream_name,
+                self._clean_table_name(self.stream_name),
                 self.schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
@@ -133,7 +137,7 @@ class AthenaSink(BatchSink):
             )
         elif object_format == 'jsonl':
             ddl = athena.generate_create_table_ddl(
-                self.stream_name,
+                self._clean_table_name(self.stream_name),
                 self.schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
