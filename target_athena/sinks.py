@@ -48,7 +48,8 @@ class AthenaSink(BatchSink):
 
     @staticmethod
     def _clean_table_name(stream_name):
-        return stream_name.replace("-", "_")
+        table_name_prefix = os.environ.get("TAP_NAME") + "_" if os.environ.get("TAP_NAME") else ""
+        return (table_name_prefix + stream_name).replace("-", "_")
 
     def process_batch(self, context: dict) -> None:
         """Write any prepped records out and return only once fully written."""
